@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <ItemGroup>
+    <ProjectReference Include="..\AiReview.Core\AiReview.Core.csproj" />
+    <ProjectReference Include="..\AiReview.Providers.Bedrock\AiReview.Providers.Bedrock.csproj" />
+    <ProjectReference Include="..\AiReview.Providers.Deterministic\AiReview.Providers.Deterministic.csproj" />
+    <ProjectReference Include="..\AiReview.Infrastructure\AiReview.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+</Project>

@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\AiReview.Core\AiReview.Core.csproj" />
+    <ProjectReference Include="..\..\src\AiReview.Providers.Bedrock\AiReview.Providers.Bedrock.csproj" />
+    <ProjectReference Include="..\..\src\AiReview.Providers.Deterministic\AiReview.Providers.Deterministic.csproj" />
+    <ProjectReference Include="..\..\src\AiReview.Infrastructure\AiReview.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>
