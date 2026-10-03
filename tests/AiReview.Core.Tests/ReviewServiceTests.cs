@@ -44,6 +44,37 @@ public class ReviewServiceTests
         Assert.Same(record, await _store.GetLatestAsync("CASE-0001", CancellationToken.None));
     }
 
+    [Theory]
+    [InlineData("```json\n{0}\n```")]
+    [InlineData("```\n{0}\n```\n")]
+    [InlineData("  ```JSON\r\n{0}\r\n```")]
+    public async Task Generate_OutputInsideOneCodeFence_IsAccepted(string format)
+    {
+        // Seen from Claude Sonnet 4.6 on Bedrock: the fence survives the prompt rule and the retry.
+        _bedrock.Returns(string.Format(format, ModelOutput.Valid("F-001")));
+
+        var record = await Service().GenerateAsync(_request, CancellationToken.None);
+
+        Assert.Equal("bedrock", record.Provider);
+        Assert.Equal(1, record.Attempts);
+    }
+
+    [Theory]
+    [InlineData("Here is the review:\n```json\n{0}\n```")]
+    [InlineData("```json\n{0}\n```\nLet me know if you need more.")]
+    [InlineData("```json\n{0}\n```\n```json\n{0}\n```")]
+    public async Task Generate_FenceWithTextAround_IsStillMalformed(string format)
+    {
+        _bedrock
+            .Returns(string.Format(format, ModelOutput.Valid("F-001")))
+            .Returns(string.Format(format, ModelOutput.Valid("F-001")));
+
+        var record = await Service().GenerateAsync(_request, CancellationToken.None);
+
+        Assert.True(record.IsFallback);
+        Assert.Equal("MALFORMED_JSON", record.FallbackReason);
+    }
+
     [Fact]
     public async Task Generate_InvalidThenValid_RetriesWithErrorCodesOnly()
     {

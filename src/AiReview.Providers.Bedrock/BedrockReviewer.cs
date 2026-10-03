@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Text.RegularExpressions;
 using Amazon.BedrockRuntime;
 using Amazon.BedrockRuntime.Model;
 using Amazon.Runtime;
@@ -85,8 +86,8 @@ public sealed class BedrockReviewer : IAiReviewer
             return AiReviewResult.TransportFailure(ProviderName, $"Bedrock client error: {ex.GetType().Name}.", stopwatch.Elapsed, modelId);
         }
 
-        var text = string.Concat(
-            response.Output?.Message?.Content?.Select(block => block.Text).Where(t => t is not null) ?? Enumerable.Empty<string>());
+        var text = StripCodeFence(string.Concat(
+            response.Output?.Message?.Content?.Select(block => block.Text).Where(t => t is not null) ?? Enumerable.Empty<string>()));
         if (text.Length == 0)
         {
             return AiReviewResult.TransportFailure(ProviderName, $"Bedrock returned no text (stop reason: {response.StopReason}).", stopwatch.Elapsed, modelId);
@@ -100,4 +101,16 @@ public sealed class BedrockReviewer : IAiReviewer
             response.Usage?.InputTokens,
             response.Usage?.OutputTokens);
     }
+
+    // Claude models often wrap JSON in a markdown fence despite the prompt, and a retry does not stop it.
+    // Only a fence around the whole response is removed; prose or anything else is left for the validator to reject.
+    internal static string StripCodeFence(string text)
+    {
+        var match = CodeFence.Match(text);
+        return match.Success ? match.Groups["body"].Value : text;
+    }
+
+    private static readonly Regex CodeFence = new(
+        @"^\s*```[A-Za-z]*[ \t]*\r?\n(?<body>.*?)\r?\n[ \t]*```\s*$",
+        RegexOptions.Singleline | RegexOptions.CultureInvariant);
 }
