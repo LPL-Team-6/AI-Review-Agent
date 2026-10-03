@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+    branches: [master]
+
+jobs:
+  test:
+    name: Build and test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore
+        run: dotnet restore AiReviewAgent.sln
+
+      - name: Build
+        run: dotnet build AiReviewAgent.sln --no-restore --configuration Release
+
+      # The tests make no network calls (Bedrock is a scripted fake), so no AWS credentials are needed.
+      - name: Test
+        run: >
+          dotnet test AiReviewAgent.sln --no-build --configuration Release
+          --logger trx --results-directory TestResults
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: TestResults/*.trx
