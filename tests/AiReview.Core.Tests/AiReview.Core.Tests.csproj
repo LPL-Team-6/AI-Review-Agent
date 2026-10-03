@@ -23,6 +23,8 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\AiReview.Core\AiReview.Core.csproj" />
     <ProjectReference Include="..\..\src\AiReview.Providers.Deterministic\AiReview.Providers.Deterministic.csproj" />
+    <ProjectReference Include="..\..\src\AiReview.Providers.Bedrock\AiReview.Providers.Bedrock.csproj" />
+    <ProjectReference Include="..\..\src\AiReview.Infrastructure\AiReview.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

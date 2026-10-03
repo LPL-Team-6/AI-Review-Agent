@@ -143,10 +143,16 @@ public sealed class DeterministicReviewer : IAiReviewer
         return note.ToString();
     }
 
-    // Strips control characters (newlines are kept for the case note) and caps the length.
+    // Strips control characters (newlines are kept for the case note), removes confidence wording copied from
+    // upstream text such as finding descriptions (VAL-5), and caps the length.
     private static string Clean(string text, int maxLength)
     {
         var lines = text.Split('\n').Select(InputSanitizer.StripControlCharacters);
-        return InputSanitizer.Truncate(string.Join('\n', lines), maxLength);
+        var cleaned = InputSanitizer.Truncate(ConfidenceClaimDetector.Redact(string.Join('\n', lines)), maxLength);
+
+        // Truncating can complete a phrase such as "high confidence" from "high confidences".
+        return ConfidenceClaimDetector.ContainsClaim(cleaned)
+            ? InputSanitizer.Truncate(ConfidenceClaimDetector.Redact(cleaned), maxLength)
+            : cleaned;
     }
 }
